@@ -4,9 +4,12 @@ using PizzaStore.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("Pizzas") ?? "Data Source=Pizzas.db";
+
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddDbContext<PizzaDb>(options => options.UseInMemoryDatabase("items"));
+//builder.Services.AddDbContext<PizzaDb>(options => options.UseInMemoryDatabase("items"));
+builder.Services.AddSqlite<PizzaDb>(connectionString);
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -27,8 +30,10 @@ if (app.Environment.IsDevelopment())
    });
 }
 
+// Get all pizzas
 app.MapGet("/pizzas", async (PizzaDb db) => await db.Pizzas.ToListAsync());
 
+// Create a new pizza
 app.MapPost("/pizza", async (PizzaDb db, Pizza pizza) =>
 {
     await db.Pizzas.AddAsync(pizza);
@@ -36,6 +41,33 @@ app.MapPost("/pizza", async (PizzaDb db, Pizza pizza) =>
     return Results.Created($"/pizza/{pizza.Id}", pizza);
 });
 
+// Get a pizza by id
 app.MapGet("/pizza/{id}", async (PizzaDb db, int id) => await db.Pizzas.FindAsync(id));
 
+// Update a pizza by id
+app.MapPut("/pizza/{id}", async (PizzaDb db, Pizza updatepizza, int id) =>
+{
+      var pizza = await db.Pizzas.FindAsync(id);
+      if (pizza is null) return Results.NotFound();
+      pizza.Name = updatepizza.Name;
+      pizza.Description = updatepizza.Description;
+      await db.SaveChangesAsync();
+      return Results.NoContent();
+});
+
+// Delete a pizza by id
+app.MapDelete("/pizza/{id}", async (PizzaDb db, int id) =>
+{
+   var pizza = await db
+   .Pizzas.FindAsync(id);
+   if (pizza is null)
+   {
+      return Results.NotFound();
+   }
+   db.Pizzas.Remove(pizza);
+   await db.SaveChangesAsync();
+   return Results.Ok();
+});
+
 app.Run();
+
