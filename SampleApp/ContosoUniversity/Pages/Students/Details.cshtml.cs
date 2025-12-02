@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.PagesStudents
+namespace ContosoUniversity.Pages.Students
 {
     public class DetailsModel : PageModel
     {
@@ -28,7 +28,7 @@ namespace ContosoUniversity.PagesStudents
                 return NotFound();
             }
 
-            var student = await _context.Student.FirstOrDefaultAsync(m => m.ID == id);
+            var student = await _context.Students.FirstOrDefaultAsync(m => m.ID == id);
 
             if (student is not null)
             {
