@@ -42,6 +42,15 @@ namespace ContosoUniversity.Pages.Students
                 return RedirectToPage("./Index");
             }
 
+            // Add this to see validation errors
+            foreach (var modelState in ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    Console.WriteLine($"Error: {error.ErrorMessage}");
+                }
+            }
+
             return Page();
         }
     }
